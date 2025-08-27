@@ -1,33 +1,45 @@
 <?php
 require "Db_Connect.php";
-require "validation.php"; // external validation file
+require "product.php";
+require "validation.php";
 
 $errors = [];
 $success = "";
+$email = $name = $price = $category_id = "";
 
-// Fetch categories
+// Fetch categories for dropdown
 $cats = $pdo->query("SELECT id, name FROM categories")->fetchAll(PDO::FETCH_ASSOC);
 $validCatIds = array_map('strval', array_column($cats, 'id'));
 
-// Preserve posted values
-$email = $_POST["email"] ?? "";
-$name  = $_POST["name"]  ?? "";
-$price = $_POST["price"] ?? "";
-$category_id = $_POST["category"] ?? "";
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    // ✅ Validate form input
     $errors = validateForm($_POST, $validCatIds);
 
     if (empty($errors)) {
-        $stmt = $pdo->prepare("INSERT INTO new_products (email, name, price, category_id) VALUES (?, ?, ?, ?)");
-        $stmt->execute([$email, $name, $price, $category_id]);
+        try {
+            $product = new Product($pdo);
+            $product->email = $_POST['email'];
+            $product->name = $_POST['name'];
+            $product->price = $_POST['price'];
+            $product->category_id = $_POST['category'];
 
-        $success = "✅ Product added successfully! Redirecting to list...";
-        $email = $name = $price = $category_id = "";
+            $product->addProduct();
+
+            $success = "✅ Product added successfully Redirect in 1 Sec...!";
+            $email = $name = $price = $category_id = ""; // clear form
+        } catch (Exception $e) {
+            $errors['db'] = "❌ Failed to save product: " . $e->getMessage();
+        }
     }
+
+    $email = $_POST['email'] ?? "";
+    $name = $_POST['name'] ?? "";
+    $price = $_POST['price'] ?? "";
+    $category_id = $_POST['category'] ?? "";
 }
 ?>
-<!DOCTYPE html>
+
 <html>
 <head>
     <title>Add Product</title>

@@ -1,53 +1,58 @@
 <?php
 require "Db_Connect.php";
-require "validation.php"; // same validation as Add
+require "product.php";
+require "validation.php";
+
+$cats = $pdo->query("SELECT id, name FROM categories")->fetchAll(PDO::FETCH_ASSOC);
+$validCatIds = array_map('strval', array_column($cats, 'id'));
 
 $errors = [];
 $success = "";
 
-// Fetch categories
-$cats = $pdo->query("SELECT id, name FROM categories")->fetchAll(PDO::FETCH_ASSOC);
-$validCatIds = array_map('strval', array_column($cats, 'id'));
-
-// Get ID
-$id = $_GET['id'] ?? null;
-if (!$id) {
-    die("❌ Invalid request. No product selected.");
+// ✅ Validate ID
+if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
+    die("❌ Invalid request. Product ID missing or not valid.");
 }
+$id = (int)$_GET['id'];
 
-// Fetch existing product
-$stmt = $pdo->prepare("SELECT * FROM new_products WHERE id = ?");
-$stmt->execute([$id]);
-$product = $stmt->fetch(PDO::FETCH_ASSOC);
+// ✅ Fetch product
+$productObj = new Product($pdo);
+$productData = $productObj->getProductById($id);
 
-if (!$product) {
+if (!$productData) {
     die("❌ Product not found.");
 }
 
-// Preserve values (from DB initially, then overwrite on POST)
-$email = $product['email'];
-$name = $product['name'];
-$price = $product['price'];
-$category_id = $product['category_id'];
+$email = $productData['email'];
+$name = $productData['name'];
+$price = $productData['price'];
+$category_id = $productData['category_id'];
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    // overwrite with posted
-    $email = $_POST['email'] ?? '';
-    $name = $_POST['name'] ?? '';
-    $price = $_POST['price'] ?? '';
-    $category_id = $_POST['category'] ?? '';
-
     $errors = validateForm($_POST, $validCatIds);
 
     if (empty($errors)) {
-        $stmt = $pdo->prepare("UPDATE new_products SET email=?, name=?, price=?, category_id=? WHERE id=?");
-        $stmt->execute([$email, $name, $price, $category_id, $id]);
+        try {
+            $productObj->email = $_POST['email'];
+            $productObj->name = $_POST['name'];
+            $productObj->price = $_POST['price'];
+            $productObj->category_id = $_POST['category'];
 
-        $success = "✅ Product updated successfully! Redirecting to list...";
+            $productObj->updateProduct($id);
+
+            $success = "✅ Product updated successfully Redirct in 1 Sec...!";
+        } catch (Exception $e) {
+            $errors['db'] = "❌ Failed to update product: " . $e->getMessage();
+        }
     }
+
+    $email = $_POST['email'] ?? "";
+    $name = $_POST['name'] ?? "";
+    $price = $_POST['price'] ?? "";
+    $category_id = $_POST['category'] ?? "";
 }
 ?>
-<!DOCTYPE html>
+
 <html>
 <head>
     <title>Edit Product</title>
