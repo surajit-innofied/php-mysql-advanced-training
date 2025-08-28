@@ -158,7 +158,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="form-group">
                     <label for="file_link">File Link</label>
                     <input id="file_link" name="file_link" type="url" value="${linkVal}" required>
-                </div>
+                </div> 
             `;
                 }
             }
@@ -192,19 +192,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <body>
     <h2>Edit Product</h2>
+
+    <!-- ---------- Edit Product Form ---------- -->
     <form method="POST">
+
+        <!-- ---------- Name Field ---------- -->
         <label>Name:</label>
         <input type="text" name="name" value="<?= htmlspecialchars($_POST['name'] ?? $product['name']) ?>">
         <?php if (!empty($errors['name'])): ?><div class="error"><?= $errors['name'] ?></div><?php endif; ?>
 
+        <!-- ---------- Email Field ---------- -->
         <label>Email:</label>
         <input type="text" name="email" value="<?= htmlspecialchars($_POST['email'] ?? $product['email']) ?>">
         <?php if (!empty($errors['email'])): ?><div class="error"><?= $errors['email'] ?></div><?php endif; ?>
 
+        <!-- ---------- Price Field ---------- -->
         <label>Price:</label>
         <input type="text" name="price" value="<?= htmlspecialchars($_POST['price'] ?? $product['price']) ?>">
         <?php if (!empty($errors['price'])): ?><div class="error"><?= $errors['price'] ?></div><?php endif; ?>
 
+        <!-- ---------- Product Type Dropdown ---------- -->
         <div class="form-group">
             <label for="productType">Product Type</label>
             <select id="productType">
@@ -214,12 +221,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </select>
         </div>
 
+        <!-- ---------- Category Dropdown ---------- -->
         <div class="form-group">
             <label for="category">Category</label>
             <select id="category" name="category" required>
                 <option value="">Select Category</option>
                 <?php foreach ($cats as $c):
-                    $capType = ucfirst(strtolower($c['type'])); // "Physical" or "Digital"
+                    $capType = ucfirst(strtolower($c['type']));
                     $sel = ($product['category'] == $c['id']) ? 'selected' : '';
                 ?>
                     <option value="<?= htmlspecialchars($c['id']) ?>" data-type="<?= $capType ?>" <?= $sel ?>>
@@ -229,21 +237,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </select>
         </div>
 
-        <!-- JS keeps this hidden input in sync -->
+        <!-- ---------- Hidden Input (keeps product type synced via JS) ---------- -->
         <input type="hidden" name="category_type" id="category_type_input" value="<?= htmlspecialchars($product['category_type']) ?>">
 
+        <!-- ---------- Extra Fields (weight/file link) ---------- -->
         <div id="extraField"></div>
 
+        <!-- ---------- Form Buttons ---------- -->
         <div class="btn-row">
             <button type="submit" class="btn">Update Product</button>
         </div>
 
+        <!-- ---------- Back Button ---------- -->
         <div style="margin-top:10px;">
             <a href="index.php" class="btn btn-secondary" style="display:inline-block; text-align:center; width:100%; padding:10px; text-decoration:none; color:#fff; border-radius:6px;">Back</a>
         </div>
     </form>
-    </div>
+
+    <!-- ---------- Back Link (extra) ---------- -->
     <a href="index.php" class="btn-back">⬅ Back</a>
+
 </body>
 
 </html>

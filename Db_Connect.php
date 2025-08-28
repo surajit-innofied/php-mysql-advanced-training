@@ -16,5 +16,6 @@ $options = [
 try {
     $pdo = new PDO($dsn, $user, $pass, $options);
 } catch (PDOException $e) {
+    // if connection is not established
     die("Connection is failed: " . $e->getMessage());
 }

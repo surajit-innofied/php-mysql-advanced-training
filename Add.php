@@ -102,6 +102,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="utf-8">
     <title>Add Product</title>
     <style>
+        /* ---------- Page Layout ---------- */
         body {
             font-family: Arial, sans-serif;
             background: #f4f6f9;
@@ -110,6 +111,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             align-items: center;
             min-height: 100vh;
         }
+
+        /* ---------- Container Box ---------- */
         .container {
             background: #fff;
             padding: 25px 30px;
@@ -117,26 +120,77 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             box-shadow: 0 2px 10px rgba(0,0,0,0.08);
             width: 420px;
         }
+
+        /* ---------- Container Heading ---------- */
         .container h1 {
             text-align: center;
             margin-bottom: 18px;
             color: #333;
             font-size: 20px;
         }
+
+        /* ---------- Form Group Styling ---------- */
         .form-group { margin-bottom: 12px; }
-        .form-group label { display:block; font-weight:600; margin-bottom:6px; color:#444; font-size:14px; }
-        .form-group input, .form-group select {
-            width:100%; padding:8px 10px; border-radius:6px; border:1px solid #d0d7de; font-size:14px;
+        
+        .form-group label {
+            display:block;
+            font-weight:600;
+            margin-bottom:6px;
+            color:#444;
+            font-size:14px;
         }
-        .form-group input:focus, .form-group select:focus { outline:none; border-color:#007bff; }
-        .btn { width:100%; padding:10px; background:#007bff; color:#fff; border:0; border-radius:6px; font-size:15px; cursor:pointer; margin-top:8px; }
+
+        .form-group input, .form-group select {
+            width:100%;
+            padding:8px 10px;
+            border-radius:6px;
+            border:1px solid #d0d7de;
+            font-size:14px;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline:none;
+            border-color:#007bff;
+        }
+
+        /* ---------- Primary Button ---------- */
+        .btn {
+            width:100%;
+            padding:10px;
+            background:#007bff;
+            color:#fff;
+            border:0;
+            border-radius:6px;
+            font-size:15px;
+            cursor:pointer;
+            margin-top:8px;
+        }
+
         .btn:hover { background:#0062d1; }
-        .btn-row { display:flex; gap:10px; }
+
+        /* ---------- Button Row ---------- */
+        .btn-row {
+            display:flex;
+            gap:10px;
+        }
+
         .btn-secondary { background:#6c757d; }
         .btn-secondary:hover { background:#5a6268; }
-        .message { padding:10px; border-radius:6px; margin-bottom:12px; font-size:14px; }
-        .error { background:#ffecec; color:#b33a3a; }
-    </style>
+
+        /* ---------- Messages (Alerts) ---------- */
+        .message {
+            padding:10px;
+            border-radius:6px;
+            margin-bottom:12px;
+            font-size:14px;
+        }
+
+        .error {
+            background:#ffecec;
+            color:#b33a3a;
+        }
+</style>
+
 </head>
 <body>
     <div class="container">
