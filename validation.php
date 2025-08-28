@@ -6,6 +6,7 @@ function validateForm($data, $validCatIds) {
     $email = trim($data['email'] ?? '');
     $price = trim($data['price'] ?? '');
     $category = trim($data['category'] ?? '');
+    $category_type = trim($data['category_type'] ?? '');
 
     if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $errors['email'] = "Please enter a valid email address.";
@@ -19,6 +20,12 @@ function validateForm($data, $validCatIds) {
         $errors['price'] = "Price must be a positive number.";
     }
 
+    // ✅ validate category type
+    if ($category_type === "" || !in_array($category_type, ["Physical", "Digital"], true)) {
+        $errors['category_type'] = "Please select a valid category type.";
+    }
+
+    // ✅ validate category id
     if ($category === "" || !in_array((string)$category, $validCatIds, true)) {
         $errors['category'] = "Please select a valid category.";
     }
