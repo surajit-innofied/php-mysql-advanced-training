@@ -9,7 +9,7 @@ $user_email = $_SESSION['user_email'] ?? ($_SESSION['user']['email'] ?? '');
 
 if ($role !== 'user') {
     // redirect to admin dashboard if not a normal user
-    header("Location: ../admin_dashboard.php");
+    header("Location: ../admin-dashboard.php");
     exit;
 }
 ?>
@@ -37,6 +37,7 @@ if ($role !== 'user') {
            (<?= htmlspecialchars($user_email) ?>)</p>
 
         <a href="../../public/index.php" class="btn btn-primary">Go to Products</a>
+        
         <a href="../../public/logout.php" class="btn btn-logout">Logout</a>
     </div>
 </body>

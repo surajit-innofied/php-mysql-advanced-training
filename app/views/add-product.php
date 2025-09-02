@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../../app/controllers/ProductController.php';
 require_once __DIR__ . '/../../config/Db_Connect.php';
 require_once __DIR__ . '/../controllers/UserController.php';
-require_once __DIR__.'/../middleware/auth.php';
+require_once __DIR__ . '/../middleware/auth.php';
 
 session_start();
 
@@ -44,6 +44,7 @@ foreach ($categories as $cat) {
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -69,7 +70,7 @@ foreach ($categories as $cat) {
             background: #fff;
             padding: 25px;
             border-radius: 8px;
-            box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
         }
 
         label {
@@ -96,7 +97,7 @@ foreach ($categories as $cat) {
         input:focus,
         select:focus {
             border-color: #04AA6D;
-            box-shadow: 0 0 5px rgba(4,170,109,0.3);
+            box-shadow: 0 0 5px rgba(4, 170, 109, 0.3);
         }
 
         button {
@@ -144,6 +145,7 @@ foreach ($categories as $cat) {
         }
     </style>
 </head>
+
 <body>
     <h1>Add New Product</h1>
     <div class="container">
@@ -181,6 +183,10 @@ foreach ($categories as $cat) {
 
             <label for="price">Price:</label>
             <input type="number" step="0.01" name="price" required>
+            
+            <label for="stock">Stock Count:</label>
+            <input type="number" name="stock" id="stock" min="0" value="0" required>
+
 
             <div id="weightField" style="display:none;">
                 <label for="weight">Weight:</label>
@@ -215,10 +221,10 @@ foreach ($categories as $cat) {
             }
         }
 
-        document.getElementById('category_type').addEventListener('change', function () {
+        document.getElementById('category_type').addEventListener('change', function() {
             const weightField = document.getElementById('weightField');
             const fileField = document.getElementById('fileField');
-            
+
             if (this.value === 'physical') {
                 weightField.style.display = 'block';
                 fileField.style.display = 'none';
@@ -232,4 +238,5 @@ foreach ($categories as $cat) {
         });
     </script>
 </body>
+
 </html>

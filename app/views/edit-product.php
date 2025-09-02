@@ -1,59 +1,59 @@
 <!-- <?php
-require_once __DIR__ . '/../../app/controllers/ProductController.php';
-require_once __DIR__ . '/../../config/Db_Connect.php';
-require_once __DIR__ . '/../middleware/auth.php'; 
+        require_once __DIR__ . '/../../app/controllers/ProductController.php';
+        require_once __DIR__ . '/../../config/Db_Connect.php';
+        require_once __DIR__ . '/../middleware/auth.php';
 
-session_start();
+        session_start();
 
-// Check if logged in
-if (!isset($_SESSION['role'])) {
-    header("Location: ../../public/login.php");
-    exit;
-}
+        // Check if logged in
+        if (!isset($_SESSION['role'])) {
+            header("Location: ../../public/login.php");
+            exit;
+        }
 
-// Allow only admin
-if ($_SESSION['role'] !== 'admin') {
-    header("Location: ../../public/index.php");
-    exit;
-}
-$controller = new ProductController();
-$errors = [];
+        // Allow only admin
+        if ($_SESSION['role'] !== 'admin') {
+            header("Location: ../../public/index.php");
+            exit;
+        }
+        $controller = new ProductController();
+        $errors = [];
 
-// Get product by ID
-$id = $_GET['id'] ?? null;
-if (!$id) {
-    die("Invalid product ID");
-}
+        // Get product by ID
+        $id = $_GET['id'] ?? null;
+        if (!$id) {
+            die("Invalid product ID");
+        }
 
-$stmt = $pdo->prepare("SELECT * FROM new_products WHERE id = ?");
-$stmt->execute([$id]);
-$product = $stmt->fetch(PDO::FETCH_ASSOC);
-if (!$product) {
-    die("Product not found");
-}
+        $stmt = $pdo->prepare("SELECT * FROM new_products WHERE id = ?");
+        $stmt->execute([$id]);
+        $product = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$product) {
+            die("Product not found");
+        }
 
 
-// Handle update
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $errors = $controller->edit($id, $_POST, $_FILES);
-    if (empty($errors)) {
-        header("Location: ../../public/index.php?success=2");
-        exit;
-    }
-}
+        // Handle update
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $errors = $controller->edit($id, $_POST, $_FILES);
+            if (empty($errors)) {
+                header("Location: ../../public/index.php?success=2");
+                exit;
+            }
+        }
 
-// Fetch categories
-$catStmt = $pdo->query("SELECT id, name, type FROM categories");
-$categories = $catStmt->fetchAll(PDO::FETCH_ASSOC);
+        // Fetch categories
+        $catStmt = $pdo->query("SELECT id, name, type FROM categories");
+        $categories = $catStmt->fetchAll(PDO::FETCH_ASSOC);
 
-$categoriesByType = [
-    'physical' => [],
-    'digital' => []
-];
-foreach ($categories as $cat) {
-    $categoriesByType[strtolower($cat['type'])][] = $cat;
-}
-?>
+        $categoriesByType = [
+            'physical' => [],
+            'digital' => []
+        ];
+        foreach ($categories as $cat) {
+            $categoriesByType[strtolower($cat['type'])][] = $cat;
+        }
+        ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -167,7 +167,7 @@ foreach ($categories as $cat) {
 <?php
 require_once __DIR__ . '/../../app/controllers/ProductController.php';
 require_once __DIR__ . '/../../config/Db_Connect.php';
-require_once __DIR__ . '/../middleware/auth.php'; 
+require_once __DIR__ . '/../middleware/auth.php';
 
 $controller = new ProductController();
 $errors = [];
@@ -208,23 +208,54 @@ foreach ($categories as $cat) {
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Edit Product</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>
         /* Minimal reset */
-        *, *::before, *::after { box-sizing: border-box; } /* Better sizing model [8] */
-        html, body { margin: 0; padding: 0; line-height: 1.5; -webkit-font-smoothing: antialiased; } /* Base legibility [8] */
-        img { max-width: 100%; display: block; } /* Safe default [8] */
-        input, button, select, textarea { font: inherit; } /* Consistent form fonts [8] */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        /* Better sizing model [8] */
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Base legibility [8] */
+        img {
+            max-width: 100%;
+            display: block;
+        }
+
+        /* Safe default [8] */
+        input,
+        button,
+        select,
+        textarea {
+            font: inherit;
+        }
+
+        /* Consistent form fonts [8] */
 
         /* Page layout */
         body {
-            font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; /* Neutral stack [6] */
-            background: #f7f7f8; /* Soft gray background [1] */
-            color: #1f2328; /* High-contrast neutral text [7] */
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+            /* Neutral stack [6] */
+            background: #f7f7f8;
+            /* Soft gray background [1] */
+            color: #1f2328;
+            /* High-contrast neutral text [7] */
         }
+
         .container {
             max-width: 720px;
             margin: 32px auto;
@@ -236,13 +267,16 @@ foreach ($categories as $cat) {
             font-size: 1.5rem;
             margin-bottom: 12px;
         }
+
         .back-link {
             display: inline-block;
             margin-bottom: 16px;
             color: #0b57d0;
             text-decoration: none;
         }
-        .back-link:hover, .back-link:focus {
+
+        .back-link:hover,
+        .back-link:focus {
             text-decoration: underline;
         }
 
@@ -252,7 +286,7 @@ foreach ($categories as $cat) {
             border: 1px solid #e6e8eb;
             border-radius: 10px;
             padding: 20px;
-            box-shadow: 0 1px 2px rgba(16,24,40,0.04);
+            box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
         }
 
         /* Errors */
@@ -264,6 +298,7 @@ foreach ($categories as $cat) {
             border-radius: 8px;
             margin-bottom: 16px;
         }
+
         .errors ul {
             margin: 0;
             padding-left: 18px;
@@ -274,11 +309,13 @@ foreach ($categories as $cat) {
             display: grid;
             gap: 14px;
         }
+
         label {
             display: block;
             font-weight: 600;
             margin-bottom: 6px;
         }
+
         input[type="text"],
         input[type="email"],
         input[type="number"],
@@ -293,9 +330,12 @@ foreach ($categories as $cat) {
             outline: none;
             transition: border-color 0.15s ease, box-shadow 0.15s ease;
         }
+
         input[type="file"] {
-            padding: 8px 10px; /* native control */
+            padding: 8px 10px;
+            /* native control */
         }
+
         input:focus,
         select:focus {
             border-color: #0b57d0;
@@ -303,11 +343,18 @@ foreach ($categories as $cat) {
         }
 
         /* Grouped fields spacing */
-        .field { margin-bottom: 6px; }
-        .hint { font-size: 0.9rem; color: #57606a; }
+        .field {
+            margin-bottom: 6px;
+        }
+
+        .hint {
+            font-size: 0.9rem;
+            color: #57606a;
+        }
 
         /* Conditional sections */
-        #weightField, #fileField {
+        #weightField,
+        #fileField {
             padding: 12px;
             border: 1px dashed #e6e8eb;
             border-radius: 8px;
@@ -326,6 +373,7 @@ foreach ($categories as $cat) {
             cursor: pointer;
             transition: background 0.15s ease, box-shadow 0.15s ease;
         }
+
         button[type="submit"]:hover,
         button[type="submit"]:focus {
             background: #0f4402ff;
@@ -334,11 +382,17 @@ foreach ($categories as $cat) {
 
         /* Small screens */
         @media (max-width: 480px) {
-            .card { padding: 16px; }
-            h1 { font-size: 1.25rem; }
+            .card {
+                padding: 16px;
+            }
+
+            h1 {
+                font-size: 1.25rem;
+            }
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <h1>Edit Product</h1>
@@ -387,6 +441,12 @@ foreach ($categories as $cat) {
                     <input type="number" step="0.01" name="price" value="<?= htmlspecialchars($product['price']) ?>" required>
                 </div>
 
+                <label for="stock">Stock</label>
+                <input type="number" name="stock" id="stock" min="0" 
+                    value="<?php echo htmlspecialchars($product['stock']); ?>"
+                    required>
+
+
                 <div id="weightField" style="display:none;">
                     <div class="field">
                         <label>Weight:</label>
@@ -431,7 +491,7 @@ foreach ($categories as $cat) {
             }
         }
 
-        document.getElementById('category_type').addEventListener('change', function () {
+        document.getElementById('category_type').addEventListener('change', function() {
             document.getElementById('weightField').style.display = (this.value === 'physical') ? 'block' : 'none';
             document.getElementById('fileField').style.display = (this.value === 'digital') ? 'block' : 'none';
         });
@@ -446,5 +506,5 @@ foreach ($categories as $cat) {
         }
     </script>
 </body>
-</html>
 
+</html>

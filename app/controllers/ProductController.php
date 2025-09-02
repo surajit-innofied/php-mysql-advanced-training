@@ -90,6 +90,8 @@ class ProductController
 
         // Insert into DB
         global $pdo;
+        // Inside your add() function before DB insert
+        $stock = isset($post['stock']) && is_numeric($post['stock']) ? (int)$post['stock'] : 0;
         $stmt = $pdo->prepare("SELECT id FROM categories WHERE id = ?");
         $stmt->execute([$product->getCategory()]);
         if ($stmt->rowCount() === 0) {
@@ -98,8 +100,8 @@ class ProductController
 
         try {
             $stmt = $pdo->prepare("
-    INSERT INTO new_products (name, email, price, category_id, weight, file_link, created_by)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO new_products (name, email, price, category_id, weight, file_link, stock ,created_by)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 ");
             $stmt->execute([
                 $product->getName(),
@@ -108,6 +110,7 @@ class ProductController
                 $product->getCategory(),   // must exist in categories.id
                 $weight ?: null,
                 $fileLink ?: null,
+                $stock,
                 $_SESSION['user']['id']    // current admin ID
             ]);
         } catch (PDOException $e) {
@@ -121,7 +124,7 @@ class ProductController
     {
         global $pdo;
         $stmt = $pdo->query("
-            SELECT p.id, p.name, p.email, p.price, p.weight, p.file_link,
+            SELECT p.id, p.name, p.email, p.price,p.stock, p.weight, p.file_link,
                    c.name AS category_name, c.type AS category_type
             FROM new_products p
             JOIN categories c ON p.category_id = c.id
@@ -133,6 +136,7 @@ class ProductController
 
 
     // Edit controller 
+
     public function edit($id, $post, $files)
     {
         if ($_SESSION['role'] !== 'admin') {
@@ -144,12 +148,14 @@ class ProductController
         }
 
         $errors = ProductValidation::validate($post, $files);
-
         if (!empty($errors)) {
             return $errors; // return validation errors
         }
 
         global $pdo;
+
+        // new field: stock
+        $stock = isset($post['stock']) ? (int)$post['stock'] : 0;
 
         if ($post['category_type'] === 'physical') {
             $product = new PhysicalProduct(
@@ -187,9 +193,10 @@ class ProductController
             $weight = null;
         }
 
+        // ✅ Update query with stock
         $stmt = $pdo->prepare("UPDATE new_products 
-                           SET name=?, email=?, category_id=?, price=?, weight=?, file_link=? 
-                           WHERE id=?");
+                       SET name=?, email=?, category_id=?, price=?, weight=?, file_link=?, stock=? 
+                       WHERE id=?");
         $stmt->execute([
             $product->getName(),
             $product->getEmail(),
@@ -197,6 +204,7 @@ class ProductController
             $product->getPrice(),
             $weight,
             $fileLink,
+            $stock,
             $id
         ]);
 

@@ -103,11 +103,19 @@
             <th>Category Type</th>
             <th>Category</th>
             <th>Price</th>
+
             <th>Weight</th>
             <th>File</th>
+            <?php if ($userController->isLoggedIn() && $_SESSION['user']['role'] === 'user'): ?>
+
+                <th>Cart</th>
+            <?php endif; ?>
+
             <?php if ($userController->isLoggedIn() && $_SESSION['user']['role'] === 'admin'): ?>
+                <th>Stock</th>
                 <th>Action</th>
             <?php endif; ?>
+
         </tr>
 
         <?php if (!empty($products)): ?>
@@ -129,7 +137,12 @@
                         <?php endif; ?>
                     </td>
 
+
                     <?php if ($userController->isLoggedIn() && $_SESSION['user']['role'] === 'admin'): ?>
+
+                        <!-- for show stock in admin  -->
+                        <td><?= htmlspecialchars($p['stock']) ?></td>
+
                         <td>
                             <div style="display:flex; gap:8px; justify-content:center;">
                                 <!-- Edit Button -->
@@ -148,6 +161,24 @@
                         </td>
 
                     <?php endif; ?>
+
+                    <!-- Add to cart for user  -->
+                    <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'user'): ?>
+                        <td>
+                            <?php if ((int)$p['stock'] > 0): ?>
+                                <form method="POST" action="../app/controllers/add-cart.php" style="display:inline;">
+                                    <input type="hidden" name="product_id" value="<?= (int)$p['id']; ?>">
+                                    <button type="submit" class="btn small">Add to Cart</button>
+                                </form>
+                                <!-- when stock is 0 -->
+                            <?php else: ?>
+                                <span style="display:inline-block; padding:4px 8px; border-radius:4px; background:#eee; color:#999; font-size:13px;">
+                                    Out of Stock
+                                </span>
+                            <?php endif; ?>
+                        </td>
+                    <?php endif; ?>
+
 
                     <?php $count++ ?>
                 </tr>
