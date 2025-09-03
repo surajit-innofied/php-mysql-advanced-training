@@ -1,53 +1,40 @@
+
+
+
 <?php
+// public/update_cart.php
 session_start();
 require_once __DIR__ . '/../../config/Db_Connect.php';
 
-if (!isset($_SESSION['user']) || ($_SESSION['user']['role'] ?? '') !== 'user') {
-    header("Location: login.php");
+if (!isset($_SESSION['user']) || empty($_SESSION['user']['id'])) {
+    header('Location: login.php');
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['quantities']) && is_array($_POST['quantities'])) {
-    foreach ($_POST['quantities'] as $id => $qty) {
-        $id = (int)$id;
+$userId = (int)$_SESSION['user']['id'];
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['quantities']) && is_array($_POST['quantities'])) {
+    foreach ($_POST['quantities'] as $cartId => $qty) {
+        $cartId = (int)$cartId;
         $qty = (int)$qty;
 
-        if (!isset($_SESSION['cart'][$id])) {
-            continue;
-        }
-
-        // Fetch latest stock
-        $stmt = $pdo->prepare("SELECT stock FROM new_products WHERE id = ?");
-        $stmt->execute([$id]);
+        // ensure the cart row belongs to this user
+        $stmt = $pdo->prepare("SELECT product_id FROM cart WHERE id = ? AND user_id = ?");
+        $stmt->execute([$cartId, $userId]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$row) continue;
 
-        if (!$row) {
-            // product gone: remove it from cart
-            unset($_SESSION['cart'][$id]);
-            continue;
-        }
-
-        $stock = (int)$row['stock'];
-
-        //remove item
         if ($qty <= 0) {
-            unset($_SESSION['cart'][$id]);           // remove item
-        } elseif ($stock <= 0) {
-            unset($_SESSION['cart'][$id]);           // out of stock now
+            // remove
+            $stmt = $pdo->prepare("DELETE FROM cart WHERE id = ? AND user_id = ?");
+            $stmt->execute([$cartId, $userId]);
         } else {
-            $_SESSION['cart'][$id]['quantity'] = min($qty, $stock);  // cap by stock
-        }
-
-        if (isset($_POST['remove_id'])) {
-            $pid = (int)$_POST['remove_id'];
-            if ($pid > 0 && isset($_SESSION['cart'][$pid])) {
-                unset($_SESSION['cart'][$pid]);
-            }
-            header('Location: cart.php');
-            exit;
+            // update
+            $stmt = $pdo->prepare("UPDATE cart SET quantity = ?, updated_at = NOW() WHERE id = ? AND user_id = ?");
+            $stmt->execute([$qty, $cartId, $userId]);
         }
     }
 }
 
-header("Location: cart.php");
+header('Location:  /../app/views/view_cart.php');
 exit;

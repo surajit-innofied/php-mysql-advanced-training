@@ -8,7 +8,7 @@ session_start();
 
 // Check if logged in
 if (!isset($_SESSION['role'])) {
-    header("Location: ../../public/login.php");
+    header("Location: login.php");
     exit;
 }
 

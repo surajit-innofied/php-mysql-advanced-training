@@ -42,6 +42,7 @@ $products = $controller->list();
             background: #04AA6D;
             color: white;
             margin: 0;
+            padding: 10px;
         }
 
         h2 {
@@ -106,6 +107,24 @@ $products = $controller->list();
             background: #7d3c98;
         }
 
+        /* Cart button - Teal */
+        .btn.cart {
+            background: #16a085;
+        }
+
+        .btn.cart:hover {
+            background: #117864;
+        }
+
+        /* Orders button - Dark Blue */
+        .btn.orders {
+            background: #2c3e50;
+        }
+
+        .btn.orders:hover {
+            background: #1a242f;
+        }
+
         .container {
             width: 90%;
             max-width: 900px;
@@ -122,6 +141,7 @@ $products = $controller->list();
             margin: 30px 0;
         }
     </style>
+     
 </head>
 
 <body>
@@ -130,35 +150,43 @@ $products = $controller->list();
     <div class="container">
         <?php if ($userController->isLoggedIn()): ?>
             <?php
-                // pull once to avoid repeating
-                $user = $_SESSION['user'];
-                $role = isset($user['role']) ? strtolower($user['role']) : 'user';
-                $profileUrl = ($role === 'admin')
-                    ? "../app/views/admin-dashboard.php"
-                    : "../app/views/user-dashboard.php";
+            $user = $_SESSION['user'];
+            $role = isset($user['role']) ? strtolower($user['role']) : 'user';
+            $profileUrl = ($role === 'admin')
+                ? "../app/views/admin-dashboard.php"
+                : "../app/views/user-dashboard.php";
             ?>
+
             <p>
                 Welcome, <?= htmlspecialchars($user['name']) ?>
                 (<?= htmlspecialchars(strtoupper($role)) ?>)
                 |
-                <a href="<?= $profileUrl ?>" class="btn profile">Profile</a>
+                <a href="<?= $profileUrl ?>" class="btn profile btn-primary">Profile</a>
+
+                <?php if ($role === 'user'): ?>
+                    |
+                    <a href="../app/views/show_cart.php" class="btn ">View Cart</a>
+                    |
+                    <a href="../app/views/orders.php" class="btn orders">Orders</a>
+                <?php elseif ($role === 'admin'): ?>
+                    |
+                    <a href="../app/views/add-product.php" class="btn">Add Product</a>
+                <?php endif; ?>
+
                 |
-                <a href="index.php?logout=1" class="btn">Logout</a>
+                <a href="index.php?logout=1" class="btn btn danger">Logout</a>
             </p>
 
-            <?php if ($role === 'admin'): ?>
-                <p>
-                    <a href="../app/views/add-product.php" class="btn">Add Product</a>
-                </p>
-            <?php endif; ?>
         <?php else: ?>
             <p><a href="../app/views/login.php" class="btn login">Login</a></p>
             <p><a href="../app/views/signup.php" class="btn signup">Sign Up</a></p>
         <?php endif; ?>
+    </div>
 
-        <hr>
-        <h2>All Products</h2>
-        <?php include __DIR__ . '/../app/views/product-list.php'; ?>
+
+    <hr>
+    <h2>All Products</h2>
+    <?php include __DIR__ . '/../app/views/product-list.php'; ?>
     </div>
 </body>
 
