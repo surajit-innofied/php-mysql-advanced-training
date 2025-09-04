@@ -1,57 +1,155 @@
 <?php
+// public/payment.php
 session_start();
 require_once __DIR__ . '/../../config/Db_Connect.php';
-require '../../vendor/autoload.php'; // Stripe SDK
+require __DIR__ . '/../../vendor/autoload.php'; // Stripe SDK
 
-\Stripe\Stripe::setApiKey(""); // your secret key
+\Stripe\Stripe::setApiKey("sk_test_51S3EVwFUS8k2RZWRDXjZb6BzQeanckw225MM8ycHzMmas9ivRbdfhzTArhDau7csSsq8QeM9tVeA4auXpXsy6vnC00g2ptdS5C");
+
+// STEP 1: Handle redirect BACK from Stripe (success or failure)
+if (isset($_GET['status']) && isset($_GET['session_id'])) {
+  $status    = $_GET['status'];
+  $sessionId = $_GET['session_id'];
+  $userId    = $_SESSION['user']['id'];
+
+  try {
+    $session = \Stripe\Checkout\Session::retrieve($sessionId);
+    $paymentStatus = $session->payment_status === "paid" ? "paid" : "failed";
+
+    // Fetch cart
+    $stmt = $pdo->prepare("
+            SELECT c.quantity, p.id as product_id, p.price
+            FROM cart c
+            JOIN new_products p ON c.product_id = p.id
+            WHERE c.user_id = ?
+        ");
+    $stmt->execute([$userId]);
+    $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    if ($items) {
+      $total = 0;
+      foreach ($items as $it) {
+        $total += $it['price'] * $it['quantity'];
+      }
+
+      // ✅ Get address details from session
+      $addressData = $_SESSION['checkout'] ?? null;
+
+      if ($addressData) {
+        // Save address in `addresses` table
+        $stmt = $pdo->prepare("
+    INSERT INTO addresses (user_id, address, city, state, zip, country, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, NOW())
+");
+        $stmt->execute([
+          $userId,
+          $addressData['address'],
+          $addressData['city'],
+          $addressData['state'],
+          $addressData['zip'],
+          $addressData['country']
+        ]);
+        $addressId = $pdo->lastInsertId();
+      } else {
+        $addressId = null; // fallback
+      }
+
+      $pdo->beginTransaction();
+
+      // ✅ Save order with address_id
+      $stmt = $pdo->prepare("
+    INSERT INTO orders (user_id, address_id, total_amount, statuss, payment_id, created_at)
+    VALUES (?, ?, ?, ?, ?, NOW())
+");
+      $stmt->execute([
+        $userId,
+        $addressId,
+        $total,
+        $paymentStatus,
+        $sessionId   // Stripe session ID as payment reference
+      ]);
+      $orderId = $pdo->lastInsertId();
+
+      // Save items
+      foreach ($items as $it) {
+        $stmt = $pdo->prepare("
+                    INSERT INTO order_items (order_id, product_id, quantity, unit_price)
+                    VALUES (?, ?, ?, ?)
+                ");
+        $stmt->execute([$orderId, $it['product_id'], $it['quantity'], $it['price']]);
+
+        // ✅ Reduce stock ONLY if payment successful
+        if ($paymentStatus === "paid") {
+          $stmt = $pdo->prepare("
+                        UPDATE new_products
+                        SET stock = stock - ?
+                        WHERE id = ? AND stock >= ?
+                    ");
+          $stmt->execute([$it['quantity'], $it['product_id'], $it['quantity']]);
+        }
+      }
 
 
 
-if (!isset($_SESSION['pending_order_id'])) {
-  echo 'issue';
-    header("Location: ../../public/index.php");
+      // ✅ Clear cart only if payment successful
+      if ($paymentStatus === "paid") {
+        $pdo->prepare("DELETE FROM cart WHERE user_id = ?")->execute([$userId]);
+      }
+
+      $pdo->commit();
+    }
+
+
+    // 🔥 Redirect to order details page (instead of orders list)
+    header("Location: http://localhost:8000/app/views/order_details.php?id=" . $orderId);
+
     exit;
+  } catch (Exception $e) {
+    die("Payment handling failed: " . $e->getMessage());
+  }
 }
 
-$orderId = $_SESSION['pending_order_id'];
-
-// Fetch order details
-$stmt = $pdo->prepare("SELECT * FROM orders WHERE id = ?");
-$stmt->execute([$orderId]);
-$order = $stmt->fetch(PDO::FETCH_ASSOC);
-
-if (!$order) {
-    die("Order not found");
+// STEP 2: Normal entry → create Stripe Checkout session
+if (!isset($_SESSION['user']) || !isset($_SESSION['checkout'])) {
+  header("Location: address.php");
+  exit;
 }
-?>
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>Payment</title>
-  <script src="https://js.stripe.com/v3/"></script>
-</head>
-<body>
-  <h2>Pay for Order #<?= $orderId ?></h2>
-  <p>Total Amount: ₹<?= number_format($order['total_amount'],2) ?></p>
 
-  <button id="payBtn">Pay with Stripe</button>
+$userId = $_SESSION['user']['id'];
 
-  <script>
-    const stripe = Stripe("ppk_test_51S3EVwFUS8k2RZWRzMqvgmOCxgKratnfT7Sh44gPda5UyYV8gXtQpZdadbpytwB9dWdnQ5LTEOQh9HxAWHNK3Itv003K7ltKUm"); // your publishable key
+// Fetch cart items
+$stmt = $pdo->prepare("
+    SELECT c.quantity, p.id as product_id, p.name, p.price
+    FROM cart c
+    JOIN new_products p ON c.product_id = p.id
+    WHERE c.user_id = ?
+");
+$stmt->execute([$userId]);
+$items = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    document.getElementById("payBtn").addEventListener("click", function() {
-        fetch("process_payment.php?order_id=<?= $orderId ?>")
-          .then(res => res.json())
-          .then(data => {
-              return stripe.redirectToCheckout({ sessionId: data.id });
-          })
-          .then(result => {
-              if (result.error) {
-                  alert(result.error.message);
-              }
-          });
-    });
-  </script>
-</body>
-</html>
+if (!$items) {
+  die("Cart is empty.");
+}
+
+$line_items = [];
+foreach ($items as $it) {
+  $line_items[] = [
+    'price_data' => [
+      'currency' => 'usd',
+      'product_data' => ['name' => $it['name']],
+      'unit_amount' => $it['price'] * 100,
+    ],
+    'quantity' => $it['quantity'],
+  ];
+}
+
+$checkout_session = \Stripe\Checkout\Session::create([
+  'payment_method_types' => ['card'],
+  'line_items'           => $line_items,
+  'mode'                 => 'payment',
+  'success_url' => "http://localhost:8000/app/views/payment.php?status=success&session_id={CHECKOUT_SESSION_ID}",
+  'cancel_url'  => "http://localhost:8000/app/views/payment.php?status=failure&session_id={CHECKOUT_SESSION_ID}",
+]);
+
+header("Location: " . $checkout_session->url);
+exit;

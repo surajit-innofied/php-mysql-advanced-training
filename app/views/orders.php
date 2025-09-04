@@ -134,6 +134,9 @@ if ($orders) {
                 <h3>
                     Order #<?= (int)$count ?> — Total: <?= number_format((float)$order['total_amount'], 2) ?>
                     <small>(Placed: <?= htmlspecialchars($order['created_at']) ?>)</small>
+                    <span style="color:<?= $order['statuss'] === 'paid' ? 'green' : 'red' ?>;">
+                        [<?= strtoupper($order['statuss']) ?>]
+                    </span>
                 </h3>
 
                 <div class="address-box">

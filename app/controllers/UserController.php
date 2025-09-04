@@ -38,10 +38,15 @@ class UserController
             $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ?");
             $stmt->execute([$data['email']]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
-             $this->syncCartToDB($user['id'], $this->pdo);
+            $this->syncCartToDB($user['id'], $this->pdo);
 
             // auto login
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['user_name'] = $user['name'];
+            $_SESSION['user_email'] = $user['email'];
+            $_SESSION['role'] = $user['role'];  // ✅ store role
             $_SESSION['user'] = $user;
+            $this->syncCartToDB($user['id'], $this->pdo);
             return true;
         }
 
@@ -116,7 +121,7 @@ class UserController
                     $_SESSION['user_email'] = $user['email'];
                     $_SESSION['role'] = $user['role'];  // ✅ store role
                     $_SESSION['user'] = $user;
-                    
+
                     header("Location: ../../public/index.php");
                     exit;
                 } else {
@@ -144,33 +149,32 @@ class UserController
 
     //cart implement 
     private function syncCartToDB($userId, $pdo)
-{
-    if (!isset($_SESSION['cart']) || empty($_SESSION['cart'])) {
-        return; // nothing to sync
-    }
-
-    foreach ($_SESSION['cart'] as $productId => $item) {
-        $quantity = (int)$item['quantity'];
-
-        // check if product already in DB cart
-        $stmt = $pdo->prepare("SELECT id, quantity FROM cart WHERE user_id = ? AND product_id = ?");
-        $stmt->execute([$userId, $productId]);
-        $existing = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if ($existing) {
-            // update quantity (add to existing)
-            $newQty = $existing['quantity'] + $quantity;
-            $stmt = $pdo->prepare("UPDATE cart SET quantity = ? WHERE id = ?");
-            $stmt->execute([$newQty, $existing['id']]);
-        } else {
-            // insert new row
-            $stmt = $pdo->prepare("INSERT INTO cart (user_id, product_id, quantity) VALUES (?, ?, ?)");
-            $stmt->execute([$userId, $productId, $quantity]);
+    {
+        if (!isset($_SESSION['cart']) || empty($_SESSION['cart'])) {
+            return; // nothing to sync
         }
+
+        foreach ($_SESSION['cart'] as $productId => $item) {
+            $quantity = (int)$item['quantity'];
+
+            // check if product already in DB cart
+            $stmt = $pdo->prepare("SELECT id, quantity FROM cart WHERE user_id = ? AND product_id = ?");
+            $stmt->execute([$userId, $productId]);
+            $existing = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($existing) {
+                // update quantity (add to existing)
+                $newQty = $existing['quantity'] + $quantity;
+                $stmt = $pdo->prepare("UPDATE cart SET quantity = ? WHERE id = ?");
+                $stmt->execute([$newQty, $existing['id']]);
+            } else {
+                // insert new row
+                $stmt = $pdo->prepare("INSERT INTO cart (user_id, product_id, quantity) VALUES (?, ?, ?)");
+                $stmt->execute([$userId, $productId, $quantity]);
+            }
+        }
+
+        // clear session cart since now saved in DB
+        unset($_SESSION['cart']);
     }
-
-    // clear session cart since now saved in DB
-    unset($_SESSION['cart']);
-}
-
 }

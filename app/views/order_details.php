@@ -1,5 +1,5 @@
 <?php
-// public/order_success.php
+// public/order_success.php (acts as order_details now)
 session_start();
 require_once __DIR__ . '/../../config/Db_Connect.php';
 
@@ -37,7 +37,7 @@ $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Order Success</title>
+    <title>Order Details</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -91,6 +91,10 @@ $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
             border-bottom: none;
         }
 
+        .btn-wrap {
+            margin-top: 20px;
+        }
+
         .btn {
             display: inline-block;
             padding: 10px 20px;
@@ -100,6 +104,7 @@ $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
             border-radius: 6px;
             font-weight: bold;
             transition: 0.3s;
+            margin: 5px;
         }
 
         .btn:hover {
@@ -109,11 +114,12 @@ $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
 </head>
 <body>
     <div class="container">
-        <h2>Thank you! Your order has been placed</h2>
+        <h2>Here is your order details</h2>
         <p><strong>Order #<?= htmlspecialchars($orderId) ?></strong></p>
+        <p>Status: <strong><?= htmlspecialchars(ucfirst($order['statuss'])) ?></strong></p>
         <p>Total: <strong>₹<?= number_format((float)$order['total_amount'], 2) ?></strong></p>
 
-        <h3> Items in your order</h3>
+        <h3>Items in your order</h3>
         <ul>
             <?php foreach ($items as $it): ?>
                 <li>
@@ -124,8 +130,10 @@ $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <?php endforeach; ?>
         </ul>
 
-        <a href="../../public/index.php" class="btn">⬅ Continue Shopping</a>
+        <div class="btn-wrap">
+            <a href="orders.php" class="btn">View All Orders</a>
+            <a href="../../public/index.php" class="btn">Continue Shopping</a>
+        </div>
     </div>
 </body>
 </html>
-
