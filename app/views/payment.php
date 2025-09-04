@@ -1,21 +1,12 @@
 <?php
+
 // public/payment.php
 session_start();
 require_once __DIR__ . '/../../config/Db_Connect.php';
 require __DIR__ . '/../../vendor/autoload.php'; // Stripe SDK
 
-// ✅ Load .env file
-$dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__, 2));
 
-$dotenv->load();
-// ✅ Get secret key from env
-$stripeSecret = $_ENV['STRIPE_SECRET_KEY'] ?? null;
-
-if (!$stripeSecret) {
-    die("Stripe secret key not found. Please set STRIPE_SECRET_KEY in your .env file.");
-}
-// ✅ Set Stripe API key
-\Stripe\Stripe::setApiKey($stripeSecret);
+//\Stripe\Stripe::setApiKey("sk_test_51S3EVwFUS8k2RZWRDXjZb6BzQeanckw225MM8ycHzMmas9ivRbdfhzTArhDau7csSsq8QeM9tVeA4auXpXsy6vnC00g2ptdS5C");
 
 
 
