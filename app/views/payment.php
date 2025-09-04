@@ -4,7 +4,7 @@ session_start();
 require_once __DIR__ . '/../../config/Db_Connect.php';
 require __DIR__ . '/../../vendor/autoload.php'; // Stripe SDK
 
-\Stripe\Stripe::setApiKey(""); // give stripe api key 
+// \Stripe\Stripe::setApiKey(""); // give stripe api key 
 
 // STEP 1: Handle redirect BACK from Stripe (success or failure)
 if (isset($_GET['status']) && isset($_GET['session_id'])) {
