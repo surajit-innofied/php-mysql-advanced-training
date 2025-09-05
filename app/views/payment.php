@@ -4,9 +4,17 @@
 session_start();
 require_once __DIR__ . '/../../config/Db_Connect.php';
 require __DIR__ . '/../../vendor/autoload.php'; // Stripe SDK
+// ✅ Send Email Confirmation
+require_once __DIR__ . '/../utils/MailService.php';
+
+use Dotenv\Dotenv;
+
+// ✅ Load .env variables
+$dotenv = Dotenv::createImmutable(__DIR__ . '/../../');
+$dotenv->load();
 
 
-//\Stripe\Stripe::setApiKey("sk_test_51S3EVwFUS8k2RZWRDXjZb6BzQeanckw225MM8ycHzMmas9ivRbdfhzTArhDau7csSsq8QeM9tVeA4auXpXsy6vnC00g2ptdS5C");
+\Stripe\Stripe::setApiKey($_ENV['STRIPE_SECRET_KEY']);
 
 
 
@@ -101,6 +109,22 @@ if (isset($_GET['status']) && isset($_GET['session_id'])) {
       }
 
       $pdo->commit();
+
+      // Get user email & name from session
+      $userEmail = $_SESSION['user']['email'];
+      $userName  = $_SESSION['user']['name'];
+
+      // Fetch order items with names
+      $stmt = $pdo->prepare("
+    SELECT oi.quantity, oi.unit_price, p.name
+    FROM order_items oi
+    JOIN new_products p ON oi.product_id = p.id
+    WHERE oi.order_id = ?
+");
+      $stmt->execute([$orderId]);
+      $orderItems = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+      sendOrderMail($userEmail, $userName, $orderId, $orderItems, $total, $paymentStatus);
     }
 
 
