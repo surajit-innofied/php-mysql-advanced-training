@@ -171,6 +171,9 @@ $products = $controller->list();
                 <?php elseif ($role === 'admin'): ?>
                     |
                     <a href="../app/views/add-product.php" class="btn">Add Product</a>
+                    |
+                    <a href="../app/views/admin_reports.php" class="btn">Reports</a>
+
                 <?php endif; ?>
 
                 |
