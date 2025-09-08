@@ -5,13 +5,28 @@ require_once __DIR__ . '/../app/controllers/UserController.php';
 $userController = new UserController();
 $controller = new ProductController();
 
-// Handle delete (admin only)
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id']) && $userController->isLoggedIn()) {
-    if (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'admin') {
-        $controller->delete((int)$_POST['delete_id']);
-        echo "<p style='color:green; text-align:center;'>Product deleted successfully!</p>";
-    } else {
-        echo "<p style='color:red; text-align:center;'>Access denied. Admins only.</p>";
+// // Handle delete (admin only)
+
+// if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id']) && $userController->isLoggedIn()) {
+//     if (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'admin') {
+//         $controller->delete(($_Pint)OST['delete_id']);
+//         echo "<p style='color:green; text-align:center;'>Product deleted successfully!</p>";
+//     } else {
+//         echo "<p style='color:red; text-align:center;'>Access denied. Admins only.</p>";
+//     }
+// }
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_POST['action']) && $_POST['action'] === 'delete_product') {
+        $id = (int)$_POST['delete_id'];
+        $result = $controller->delete($id);
+
+        if ($result) {
+            header("Location: products.php?msg=deleted");
+            exit;
+        } else {
+            echo "<p style='color:red'>Delete failed. Please try again.</p>";
+        }
     }
 }
 
@@ -28,6 +43,9 @@ $products = $controller->list();
 
 <head>
     <title>Ecommerce - Product Management</title>
+    <link rel="icon" type="image/png" href="download.png" 
+        alt="Download icon showing a downward arrow inside a circle, representing file download. The icon is set against a transparent background and conveys a neutral, functional tone.">
+    
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -124,6 +142,11 @@ $products = $controller->list();
         .btn.orders:hover {
             background: #1a242f;
         }
+        
+        /* Reports button */
+        .btn.btn-secondary {
+            background: grey;
+        }
 
         .container {
             width: 90%;
@@ -172,7 +195,7 @@ $products = $controller->list();
                     |
                     <a href="../app/views/add-product.php" class="btn">Add Product</a>
                     |
-                    <a href="../app/views/admin_reports.php" class="btn">Reports</a>
+                    <a href="../app/views/admin_reports.php" class="btn btn-secondary">Reports</a>
 
                 <?php endif; ?>
 

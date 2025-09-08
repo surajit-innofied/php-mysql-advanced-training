@@ -120,101 +120,131 @@ class ProductController
         return []; // no errors
     }
 
+
+    // List Products
     public function list()
     {
         global $pdo;
-        $stmt = $pdo->query("
-            SELECT p.id, p.name, p.email, p.price,p.stock, p.weight, p.file_link,
+
+        if ($_SESSION['role'] === 'admin') {
+            // Admin → show all (including deleted)
+            $stmt = $pdo->query("
+            SELECT p.id, p.name, p.email, p.price, p.stock, p.weight, p.file_link, p.is_deleted,
                    c.name AS category_name, c.type AS category_type
             FROM new_products p
             JOIN categories c ON p.category_id = c.id
             ORDER BY p.id DESC
         ");
+        } else {
+            // Normal users → only active products
+            $stmt = $pdo->query("
+            SELECT p.id, p.name, p.email, p.price, p.stock, p.weight, p.file_link,
+                   c.name AS category_name, c.type AS category_type
+            FROM new_products p
+            JOIN categories c ON p.category_id = c.id
+            WHERE p.is_deleted = 0
+            ORDER BY p.id DESC
+        ");
+        }
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
 
+
     // Edit controller 
 
-    public function edit($id, $post, $files)
-    {
-        if ($_SESSION['role'] !== 'admin') {
-            die("Access denied! Only admins can edit products.");
-        }
-
-        if (!isset($_SESSION['user'])) {
-            throw new Exception("Unauthorized access");
-        }
-
-        $errors = ProductValidation::validate($post, $files);
-        if (!empty($errors)) {
-            return $errors; // return validation errors
-        }
-
-        global $pdo;
-
-        // new field: stock
-        $stock = isset($post['stock']) ? (int)$post['stock'] : 0;
-
-        if ($post['category_type'] === 'physical') {
-            $product = new PhysicalProduct(
-                $post['name'],
-                $post['email'],
-                $post['category_type'],
-                $post['category'],
-                $post['price'],
-                $post['weight']
-            );
-            $weight = $product->getWeight();
-            $fileLink = null;
-        } else {
-            // If new file uploaded, replace; otherwise keep old one
-            if (!empty($files['file_link']['name'])) {
-                $fileName = time() . "_" . basename($files['file_link']['name']);
-                $targetPath = __DIR__ . '/../../public/uploads/' . $fileName;
-                move_uploaded_file($files['file_link']['tmp_name'], $targetPath);
-                $fileLink = $fileName;
-            } else {
-                // Keep old file link
-                $stmtOld = $pdo->prepare("SELECT file_link FROM new_products WHERE id=?");
-                $stmtOld->execute([$id]);
-                $fileLink = $stmtOld->fetchColumn();
-            }
-
-            $product = new DigitalProduct(
-                $post['name'],
-                $post['email'],
-                $post['category_type'],
-                $post['category'],
-                $post['price'],
-                $fileLink
-            );
-            $weight = null;
-        }
-
-        // ✅ Update query with stock
-        $stmt = $pdo->prepare("UPDATE new_products 
-                       SET name=?, email=?, category_id=?, price=?, weight=?, file_link=?, stock=? 
-                       WHERE id=?");
-        $stmt->execute([
-            $product->getName(),
-            $product->getEmail(),
-            $product->getCategory(),
-            $product->getPrice(),
-            $weight,
-            $fileLink,
-            $stock,
-            $id
-        ]);
-
-        return [];
+   public function edit($id, $post, $files)
+{
+    if ($_SESSION['role'] !== 'admin') {
+        die("Access denied! Only admins can edit products.");
     }
+
+    if (!isset($_SESSION['user'])) {
+        throw new Exception("Unauthorized access");
+    }
+
+    global $pdo;
+
+    // ✅ Check if product is deleted
+    $stmtCheck = $pdo->prepare("SELECT is_deleted FROM new_products WHERE id = ?");
+    $stmtCheck->execute([$id]);
+    $isDeleted = $stmtCheck->fetchColumn();
+
+    if ($isDeleted == 1) {
+        throw new Exception("This product has been deleted and cannot be edited.");
+    }
+
+    // Validation
+    $errors = ProductValidation::validate($post, $files);
+    if (!empty($errors)) {
+        return $errors; // return validation errors
+    }
+
+    // new field: stock
+    $stock = isset($post['stock']) ? (int)$post['stock'] : 0;
+
+    if ($post['category_type'] === 'physical') {
+        $product = new PhysicalProduct(
+            $post['name'],
+            $post['email'],
+            $post['category_type'],
+            $post['category'],
+            $post['price'],
+            $post['weight']
+        );
+        $weight = $product->getWeight();
+        $fileLink = null;
+    } else {
+        // If new file uploaded, replace; otherwise keep old one
+        if (!empty($files['file_link']['name'])) {
+            $fileName = time() . "_" . basename($files['file_link']['name']);
+            $targetPath = __DIR__ . '/../../public/uploads/' . $fileName;
+            move_uploaded_file($files['file_link']['tmp_name'], $targetPath);
+            $fileLink = $fileName;
+        } else {
+            // Keep old file link
+            $stmtOld = $pdo->prepare("SELECT file_link FROM new_products WHERE id=?");
+            $stmtOld->execute([$id]);
+            $fileLink = $stmtOld->fetchColumn();
+        }
+
+        $product = new DigitalProduct(
+            $post['name'],
+            $post['email'],
+            $post['category_type'],
+            $post['category'],
+            $post['price'],
+            $fileLink
+        );
+        $weight = null;
+    }
+
+    // ✅ Update query with stock
+    $stmt = $pdo->prepare("UPDATE new_products 
+                   SET name=?, email=?, category_id=?, price=?, weight=?, file_link=?, stock=? 
+                   WHERE id=?");
+    $stmt->execute([
+        $product->getName(),
+        $product->getEmail(),
+        $product->getCategory(),
+        $product->getPrice(),
+        $weight,
+        $fileLink,
+        $stock,
+        $id
+    ]);
+
+    return [];
+}
+
 
 
     // Delete Product
     public function delete($id)
     {
+
+
         if ($_SESSION['role'] !== 'admin') {
             die("Access denied! Only admins can delete products.");
         }
@@ -226,7 +256,8 @@ class ProductController
             throw new Exception("Unauthorized access");
         }
 
-        $stmt = $pdo->prepare("DELETE FROM new_products WHERE id = ?");
+        // Soft delete instead of real delete
+        $stmt = $pdo->prepare("UPDATE new_products SET is_deleted = 1 WHERE id = ?");
         return $stmt->execute([$id]);
     }
 }

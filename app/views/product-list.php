@@ -113,7 +113,10 @@
 
             <?php if ($userController->isLoggedIn() && $_SESSION['user']['role'] === 'admin'): ?>
                 <th>Stock</th>
+                <th>Deleted</th>
                 <th>Action</th>
+
+
             <?php endif; ?>
 
         </tr>
@@ -140,26 +143,35 @@
 
                     <?php if ($userController->isLoggedIn() && $_SESSION['user']['role'] === 'admin'): ?>
 
-                        <!-- for show stock in admin  -->
+                        <!-- show stock -->
                         <td><?= htmlspecialchars($p['stock']) ?></td>
+
+                        <!-- show deleted status -->
+                        <td>
+                            <?= ($p['is_deleted'] == 1) ? "<span style='color:red;font-weight:bold;'>Yes</span>" : "No"; ?>
+                        </td>
 
                         <td>
                             <div style="display:flex; gap:8px; justify-content:center;">
-                                <!-- Edit Button -->
-                                <form method="GET" action="../app/views/edit-product.php">
-                                    <input type="hidden" name="id" value="<?= $p['id']; ?>">
-                                    <button type="submit" class="btn small">Edit</button>
-                                </form>
+                                <?php if ($p['is_deleted'] == 0): ?>
+                                    <!-- Edit Button -->
+                                    <form method="GET" action="../app/views/edit-product.php">
+                                        <input type="hidden" name="id" value="<?= $p['id']; ?>">
+                                        <button type="submit" class="btn small">Edit</button>
+                                    </form>
 
-                                <!-- Delete Button -->
-                                <form method="POST" action="index.php"
-                                    onsubmit="return confirm('Delete this product?');">
-                                    <input type="hidden" name="delete_id" value="<?= $p['id']; ?>">
-                                    <button type="submit" class="btn small danger">Delete</button>
-                                </form>
+                                    <!-- Delete Button -->
+                                    <form method="POST" action="index.php"
+                                        onsubmit="return confirm('Delete this product?');">
+                                        <input type="hidden" name="action" value="delete_product">
+                                        <input type="hidden" name="delete_id" value="<?= $p['id']; ?>">
+                                        <button type="submit" class="btn small danger">Delete</button>
+                                    </form>
+                                <?php else: ?>
+                                    <span style="color:#666; font-size:13px;">(No Action)</span>
+                                <?php endif; ?>
                             </div>
                         </td>
-
                     <?php endif; ?>
 
                     <!-- Add to cart for user  -->

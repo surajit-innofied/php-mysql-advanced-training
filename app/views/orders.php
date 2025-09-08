@@ -28,7 +28,7 @@ if ($orders) {
     $in  = str_repeat('?,', count($orderIds) - 1) . '?';
     $stmt = $pdo->prepare("
         SELECT oi.order_id, oi.quantity, oi.unit_price,
-               p.name
+               p.name ,p.is_deleted
         FROM order_items oi
         JOIN new_products p ON oi.product_id = p.id
         WHERE oi.order_id IN ($in)
@@ -161,7 +161,15 @@ if ($orders) {
                     </tr>
                     <?php foreach ($orderItems[$order['id']] ?? [] as $item): ?>
                         <tr>
-                            <td><?= htmlspecialchars($item['name']) ?></td>
+                            <td>
+                                <?php if (!empty($item['is_deleted']) && $item['is_deleted'] == 1): ?>
+                                    <span style="color:#999; font-style:italic;">
+                                        <?= htmlspecialchars($item['name']) ?> (Product Deleted)
+                                    </span>
+                                <?php else: ?>
+                                    <?= htmlspecialchars($item['name']) ?>
+                                <?php endif; ?>
+                            </td>
                             <td><?= number_format((float)$item['unit_price'], 2) ?></td>
                             <td><?= (int)$item['quantity'] ?></td>
                             <td><?= number_format((float)$item['unit_price'] * (int)$item['quantity'], 2) ?></td>
