@@ -13,7 +13,7 @@ if (!isset($_SESSION['user'])) {
 }
 
 // Check if the user's role is not 'admin'
-if ($_SESSION['user']['role'] !== 'admin') {
+if ($_SESSION['user']['role'] !== 'user') {
     header("Location: /../../public/index.php");
     exit;
 }

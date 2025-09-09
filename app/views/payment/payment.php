@@ -2,15 +2,16 @@
 
 // public/payment.php
 session_start();
-require_once __DIR__ . '/../../config/Db_Connect.php';
-require __DIR__ . '/../../vendor/autoload.php'; // Stripe SDK
+require_once __DIR__ . '/../../../config/Db_Connect.php';
+require __DIR__ . '/../../../vendor/autoload.php'; // Stripe SDK
 // ✅ Send Email Confirmation
-require_once __DIR__ . '/../utils/MailService.php';
+require_once __DIR__ . '/../../utils/MailService.php';
+require_once __DIR__ . '/../../middleware/auth.php';
 
 use Dotenv\Dotenv;
 
 // ✅ Load .env variables
-$dotenv = Dotenv::createImmutable(__DIR__ . '/../../');
+$dotenv = Dotenv::createImmutable(__DIR__ . '/../../../');
 $dotenv->load();
 
 
@@ -129,7 +130,7 @@ if (isset($_GET['status']) && isset($_GET['session_id'])) {
 
 
     // 🔥 Redirect to order details page (instead of orders list)
-    header("Location: http://localhost:8000/app/views/order_details.php?id=" . $orderId);
+    header("Location: http://localhost:8000/app/views/orders/order_details.php?id=" . $orderId);
 
     exit;
   } catch (Exception $e) {
@@ -175,8 +176,8 @@ $checkout_session = \Stripe\Checkout\Session::create([
   'payment_method_types' => ['card'],
   'line_items'           => $line_items,
   'mode'                 => 'payment',
-  'success_url' => "http://localhost:8000/app/views/payment.php?status=success&session_id={CHECKOUT_SESSION_ID}",
-  'cancel_url'  => "http://localhost:8000/app/views/payment.php?status=failure&session_id={CHECKOUT_SESSION_ID}",
+  'success_url' => "http://localhost:8000/app/views/payment/payment.php?status=success&session_id={CHECKOUT_SESSION_ID}",
+  'cancel_url'  => "http://localhost:8000/app/views/payment/payment.php?status=failure&session_id={CHECKOUT_SESSION_ID}",
 ]);
 
 header("Location: " . $checkout_session->url);

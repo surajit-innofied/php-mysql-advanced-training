@@ -1,8 +1,8 @@
 <?php
 // public/orders.php
 session_start();
-require_once __DIR__ . '/../../config/Db_Connect.php';
-
+require_once __DIR__ . '/../../../config/Db_Connect.php';
+require_once __DIR__ . '/../../middleware/user.php';
 if (!isset($_SESSION['user']) || empty($_SESSION['user']['id'])) {
     header('Location: login.php');
     exit;
@@ -48,87 +48,20 @@ if ($orders) {
 <head>
     <meta charset="utf-8">
     <title>My Orders</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f6f9;
-            padding: 20px;
-        }
-
-        .wrap {
-            max-width: 1000px;
-            margin: 20px auto;
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, .06);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 25px;
-        }
-
-        th,
-        td {
-            padding: 12px;
-            border-bottom: 1px solid #eee;
-            text-align: left;
-        }
-
-        th {
-            background: #04AA6D;
-            color: #fff;
-        }
-
-        .btn {
-            padding: 8px 16px;
-            border-radius: 6px;
-            background: #04AA6D;
-            color: #fff;
-            text-decoration: none;
-            border: 0;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .btn:hover {
-            background: #028a56;
-        }
-
-        h3 {
-            margin-top: 30px;
-            color: #2c3e50;
-            background: #ecf0f1;
-            padding: 10px 15px;
-            border-left: 5px solid #04AA6D;
-            border-radius: 4px;
-        }
-
-        .address-box {
-            background: #fafafa;
-            padding: 10px;
-            border: 1px solid #eee;
-            border-radius: 5px;
-            margin-bottom: 15px;
-            font-size: 14px;
-            color: #444;
-        }
-    </style>
+   <link rel="stylesheet" href="/../../../public/css/orders.css">
 </head>
 
 <body>
     <div class="wrap">
         <div style="display:flex; justify-content:space-between; align-items:center;">
             <h2 style="color:#04AA6D; margin:0;">My Orders</h2>
-            <a href="../../public/index.php" class="btn">⬅ Continue Shopping</a>
+            <a href="/../../../public/index.php" class="btn">⬅ Continue Shopping</a>
         </div>
 
         <?php $count = 1; ?>
 
         <?php if (empty($orders)): ?>
-            <p>No orders found. <a href="../../public/index.php">Shop Now</a></p>
+            <p>No orders found. <a href="/../../../public/index.php">Shop Now</a></p>
         <?php else: ?>
             <?php foreach ($orders as $order): ?>
                 <h3>

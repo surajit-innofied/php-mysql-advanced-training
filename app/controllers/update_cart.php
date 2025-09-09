@@ -36,5 +36,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['quantities']) && is_
     }
 }
 
-header('Location:  /../app/views/view_cart.php');
+header('Location:  /../app/views/cart/view_cart.php');
 exit;

@@ -2,33 +2,11 @@
 require_once __DIR__ . '/../app/controllers/ProductController.php';
 require_once __DIR__ . '/../app/controllers/UserController.php';
 
+session_start();
+
 $userController = new UserController();
 $controller = new ProductController();
 
-// // Handle delete (admin only)
-
-// if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id']) && $userController->isLoggedIn()) {
-//     if (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'admin') {
-//         $controller->delete(($_Pint)OST['delete_id']);
-//         echo "<p style='color:green; text-align:center;'>Product deleted successfully!</p>";
-//     } else {
-//         echo "<p style='color:red; text-align:center;'>Access denied. Admins only.</p>";
-//     }
-// }
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['action']) && $_POST['action'] === 'delete_product') {
-        $id = (int)$_POST['delete_id'];
-        $result = $controller->delete($id);
-
-        if ($result) {
-            header("Location: products.php?msg=deleted");
-            exit;
-        } else {
-            echo "<p style='color:red'>Delete failed. Please try again.</p>";
-        }
-    }
-}
 
 // Logout
 if (isset($_GET['logout'])) {
@@ -38,6 +16,7 @@ if (isset($_GET['logout'])) {
 // Fetch product list
 $products = $controller->list();
 ?>
+
 <!DOCTYPE html>
 <html>
 
@@ -176,8 +155,8 @@ $products = $controller->list();
             $user = $_SESSION['user'];
             $role = isset($user['role']) ? strtolower($user['role']) : 'user';
             $profileUrl = ($role === 'admin')
-                ? "../app/views/admin-dashboard.php"
-                : "../app/views/user-dashboard.php";
+                ? "../app/views/admin/admin-dashboard.php"
+                : "../app/views/user/user-dashboard.php";
             ?>
 
             <p>
@@ -188,14 +167,14 @@ $products = $controller->list();
 
                 <?php if ($role === 'user'): ?>
                     |
-                    <a href="../app/views/show_cart.php" class="btn ">View Cart</a>
+                    <a href="../app/views/cart/show_cart.php" class="btn ">View Cart</a>
                     |
-                    <a href="../app/views/orders.php" class="btn orders">Orders</a>
+                    <a href="../app/views/orders/orders.php" class="btn orders">Orders</a>
                 <?php elseif ($role === 'admin'): ?>
                     |
-                    <a href="../app/views/add-product.php" class="btn">Add Product</a>
+                    <a href="../app/views/product/add-product.php" class="btn">Add Product</a>
                     |
-                    <a href="../app/views/admin_reports.php" class="btn btn-secondary">Reports</a>
+                    <a href="../app/views/admin/admin_reports.php" class="btn btn-secondary">Reports</a>
 
                 <?php endif; ?>
 
@@ -212,7 +191,7 @@ $products = $controller->list();
 
     <hr>
     <h2>All Products</h2>
-    <?php include __DIR__ . '/../app/views/product-list.php'; ?>
+    <?php include __DIR__ . '/../app/views/product/product-list.php'; ?>
     </div>
 </body>
 

@@ -1,7 +1,7 @@
 <?php
 // app/views/user_dashboard.php
 session_start();
-
+require_once __DIR__ . '/../../middleware/user.php';
 // normalize session fields (support both styles you've used)
 $role = $_SESSION['role'] ?? ($_SESSION['user']['role'] ?? null);
 $user_name = $_SESSION['user_name'] ?? ($_SESSION['user']['name'] ?? '');
@@ -9,7 +9,7 @@ $user_email = $_SESSION['user_email'] ?? ($_SESSION['user']['email'] ?? '');
 
 if ($role !== 'user') {
     // redirect to admin dashboard if not a normal user
-    header("Location: ../admin-dashboard.php");
+    header("Location: /../admin/admin-dashboard.php");
     exit;
 }
 ?>
@@ -36,9 +36,9 @@ if ($role !== 'user') {
         <p>Welcome, <strong><?= htmlspecialchars($user_name) ?></strong><br>
            (<?= htmlspecialchars($user_email) ?>)</p>
 
-        <a href="../../public/index.php" class="btn btn-primary">Go to Products</a>
+        <a href="/../../../public/index.php" class="btn btn-primary">Go to Products</a>
         
-        <a href="../../public/logout.php" class="btn btn-logout">Logout</a>
+        <a href="/../../../public/logout.php" class="btn btn-logout">Logout</a>
     </div>
 </body>
 </html>

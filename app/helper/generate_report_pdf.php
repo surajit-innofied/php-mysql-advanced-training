@@ -14,7 +14,7 @@ use Dompdf\Options;
 
 // ✅ Ensure only admins can access
 if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
-    header("Location: ../../public/index.php");
+    header("Location: /../../../public/index.php");
     exit;
 }
 
@@ -74,4 +74,4 @@ $dompdf->setPaper('A4', 'portrait');
 $dompdf->render();
 
 // ✅ Stream PDF in browser
-$dompdf->stream("admin_report.pdf", ["Attachment" => false]);
+$dompdf->stream("helper/product/admin_report.pdf", ["Attachment" => false]);

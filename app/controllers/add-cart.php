@@ -45,5 +45,5 @@ if ($existing) {
 }
 
 // redirect to view cart
-header('Location:  /../app/views/view_cart.php');
+header('Location:  /../app/views/cart/view_cart.php');
 exit;

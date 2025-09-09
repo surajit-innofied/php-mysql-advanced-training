@@ -16,5 +16,5 @@ if ($cartId > 0) {
     $stmt->execute([$cartId, $userId]);
 }
 
-header('Location:  /../app/views/view_cart.php');
+header('Location:  /../app/views/cart/view_cart.php');
 exit;

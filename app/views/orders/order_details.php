@@ -1,7 +1,8 @@
 <?php
 // public/order_success.php (acts as order_details now)
 session_start();
-require_once __DIR__ . '/../../config/Db_Connect.php';
+require_once __DIR__ . '/../../../config/Db_Connect.php';
+require_once __DIR__ . '/../../middleware/user.php';
 
 if (!isset($_SESSION['user']) || empty($_SESSION['user']['id'])) {
     header('Location: login.php');
@@ -38,79 +39,7 @@ $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <head>
     <meta charset="utf-8">
     <title>Order Details</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f6f9;
-            margin: 0;
-            padding: 0;
-            color: #333;
-        }
-
-        .container {
-            max-width: 700px;
-            margin: 60px auto;
-            background: #fff;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0px 6px 18px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-
-        h2 {
-            color: #04AA6D;
-            margin-bottom: 10px;
-        }
-
-        h3 {
-            margin-top: 30px;
-            margin-bottom: 15px;
-            color: #333;
-        }
-
-        p {
-            font-size: 16px;
-            margin: 8px 0;
-        }
-
-        ul {
-            list-style: none;
-            padding: 0;
-            margin: 0 auto 20px;
-            text-align: left;
-            max-width: 500px;
-        }
-
-        ul li {
-            padding: 10px;
-            border-bottom: 1px solid #eee;
-            font-size: 15px;
-        }
-
-        ul li:last-child {
-            border-bottom: none;
-        }
-
-        .btn-wrap {
-            margin-top: 20px;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 10px 20px;
-            background: #04AA6D;
-            color: white;
-            text-decoration: none;
-            border-radius: 6px;
-            font-weight: bold;
-            transition: 0.3s;
-            margin: 5px;
-        }
-
-        .btn:hover {
-            background: #028a56;
-        }
-    </style>
+    <link rel="stylesheet" href="/../../../public/css/order_details.css">
 </head>
 <body>
     <div class="container">
@@ -132,7 +61,7 @@ $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         <div class="btn-wrap">
             <a href="orders.php" class="btn">View All Orders</a>
-            <a href="../../public/index.php" class="btn">Continue Shopping</a>
+            <a href="/../../../public/index.php" class="btn">Continue Shopping</a>
         </div>
     </div>
 </body>

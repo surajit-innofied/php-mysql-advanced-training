@@ -260,4 +260,27 @@ class ProductController
         $stmt = $pdo->prepare("UPDATE new_products SET is_deleted = 1 WHERE id = ?");
         return $stmt->execute([$id]);
     }
+
+
+    /**
+     * Fetches all categories and groups them by type.
+     *
+     *An array of categories, grouped by 'physical' and 'digital'.
+     */
+    public function getCategories()
+    {
+        global $pdo;
+        $catStmt = $pdo->query("SELECT id, name, type FROM categories");
+        $categories = $catStmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $categoriesByType = [
+            'physical' => [],
+            'digital' => []
+        ];
+        foreach ($categories as $cat) {
+            $categoriesByType[strtolower($cat['type'])][] = $cat;
+        }
+
+        return $categoriesByType;
+    }
 }

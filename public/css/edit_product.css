@@ -1,0 +1,178 @@
+
+        /* Minimal reset */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        /* Better sizing model [8] */
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Base legibility [8] */
+        img {
+            max-width: 100%;
+            display: block;
+        }
+
+        /* Safe default [8] */
+        input,
+        button,
+        select,
+        textarea {
+            font: inherit;
+        }
+
+        /* Consistent form fonts [8] */
+
+        /* Page layout */
+        body {
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+            /* Neutral stack [6] */
+            background: #f7f7f8;
+            /* Soft gray background [1] */
+            color: #1f2328;
+            /* High-contrast neutral text [7] */
+        }
+
+        .container {
+            max-width: 720px;
+            margin: 32px auto;
+            padding: 0 16px;
+        }
+
+        /* Header + link */
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 12px;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 16px;
+            color: #0b57d0;
+            text-decoration: none;
+        }
+
+        .back-link:hover,
+        .back-link:focus {
+            text-decoration: underline;
+        }
+
+        /* Card */
+        .card {
+            background: #fff;
+            border: 1px solid #e6e8eb;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+        }
+
+        /* Errors */
+        .errors {
+            border: 1px solid #f1c0c0;
+            background: #fff5f5;
+            color: #8a1f1f;
+            padding: 12px 14px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+
+        .errors ul {
+            margin: 0;
+            padding-left: 18px;
+        }
+
+        /* Form */
+        form {
+            display: grid;
+            gap: 14px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="number"],
+        input[type="file"],
+        select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d0d7de;
+            border-radius: 8px;
+            background: #fff;
+            color: inherit;
+            outline: none;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        input[type="file"] {
+            padding: 8px 10px;
+            /* native control */
+        }
+
+        input:focus,
+        select:focus {
+            border-color: #0b57d0;
+            box-shadow: 0 0 0 3px rgba(11, 87, 208, 0.15);
+        }
+
+        /* Grouped fields spacing */
+        .field {
+            margin-bottom: 6px;
+        }
+
+        .hint {
+            font-size: 0.9rem;
+            color: #57606a;
+        }
+
+        /* Conditional sections */
+        #weightField,
+        #fileField {
+            padding: 12px;
+            border: 1px dashed #e6e8eb;
+            border-radius: 8px;
+            background: #fafbfc;
+        }
+
+        /* Button */
+        button[type="submit"] {
+            appearance: none;
+            border: 1px solid #127709ff;
+            background: #2c8d06ff;
+            color: #fff;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        button[type="submit"]:hover,
+        button[type="submit"]:focus {
+            background: #0f4402ff;
+            box-shadow: 0 2px 8px rgba(52, 223, 89, 0.25);
+        }
+
+        /* Small screens */
+        @media (max-width: 480px) {
+            .card {
+                padding: 16px;
+            }
+
+            h1 {
+                font-size: 1.25rem;
+            }
+        }
+ 
